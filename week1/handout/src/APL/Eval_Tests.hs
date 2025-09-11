@@ -13,6 +13,14 @@ tests =
         eval (CstInt 5) 
         @?= (Right (ValInt 5)),
       
+      testCase "Eql_int" $ 
+        eval (Eql (CstInt 5) (CstInt 5))
+        @?= (Right (ValBool True)),
+
+      testCase "Eql_bool" $ 
+        eval (Eql (CstBool True) (CstBool True))
+        @?= (Right (ValBool True)),
+
       testCase "Add" $
         eval (Add (CstInt 5) (CstInt 2))
         @?= (Right (ValInt 7)),
@@ -39,5 +47,18 @@ tests =
 
       testCase "Pow" $
         eval (Pow (CstInt 5) (CstInt 2))
-        @?= (Right (ValInt 25))
+        @?= (Right (ValInt 25)),
+
+      testCase "If_non_bool" $
+        eval (If (CstInt 5) (CstInt 2) (CstInt 3))
+        @?= (Left "Non-boolean in if"),
+
+      testCase "If_true" $
+        eval (If (CstBool True) (CstInt 2) (CstInt 3))
+        @?= (Right (ValInt 2)),
+        
+      testCase "If_false" $
+        eval (If (CstBool False) (CstInt 2) (CstInt 3))
+        @?= (Right (ValInt 3))
+    
     ]
