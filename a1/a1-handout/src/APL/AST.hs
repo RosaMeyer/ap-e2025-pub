@@ -20,6 +20,7 @@ data Exp
   | Var VName
   | Let VName Exp Exp
   -- TODO: add cases
+  | TryCatch Exp Exp
   deriving (Eq, Show)
 
 printExp :: Exp -> String

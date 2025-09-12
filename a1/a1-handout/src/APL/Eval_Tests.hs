@@ -90,7 +90,38 @@ tests =
               (Add (CstInt 2) (CstInt 3))
               (Let "x" (CstBool True) (Var "x"))
           )
-          @?= Right (ValBool True)
-          --
-          -- TODO - add more
+          @?= Right (ValBool True),
+      --
+      -- TODO - add more
+      -- eval [] (TryCatch (CstInt 0) (CstInt 1)) -> Right (ValInt 0)
+      testCase "TryCatch without failures" $ 
+        eval 
+          envEmpty 
+          ( TryCatch (CstInt 0) (CstInt 1)) 
+        @?= Right (ValInt 0),
+
+      -- eval [] (TryCatch (Var "missing") (CstInt 1)) -> Right (ValInt 1)
+      testCase "TryCatchn with e1 evaluates as failure" $ 
+        eval 
+          envEmpty 
+          ( TryCatch (Var "missing") (CstInt 1)) 
+        @?= Right (ValInt 1),
+
+      testCase "TryCatch with error in e1" $    
+        eval
+          envEmpty
+          ( TryCatch 
+              (Div (CstInt 1) (CstInt 0)) 
+              (CstInt 1)
+          )
+        @?= Right (ValInt 1),
+
+      testCase "TryCatch with error in e2" $
+        eval 
+          envEmpty
+          ( TryCatch 
+              (Add (CstInt 2) (CstInt 5)) 
+              (Pow (CstInt 2) (CstInt (-1)))
+          )
+        @?= Right (ValInt 7) 
     ]

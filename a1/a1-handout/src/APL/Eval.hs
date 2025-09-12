@@ -80,3 +80,8 @@ eval env (Let var e1 e2) =
     Right v -> eval (envExtend var v env) e2
 
 -- TODO: Add cases after extending Exp.
+
+eval env (TryCatch e1 e2) =
+  case eval env e1 of
+    Left _err -> eval env e2
+    Right v -> Right v
