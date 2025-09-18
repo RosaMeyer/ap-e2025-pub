@@ -85,3 +85,5 @@ eval env (TryCatch e1 e2) =
   case eval env e1 of
     Left _err -> eval env e2
     Right v -> Right v
+
+    

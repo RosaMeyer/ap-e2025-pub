@@ -31,3 +31,15 @@ parseAPL :: FilePath -> String -> Either String Exp
 parseAPL fname s = case parse (space *> pExp <* eof) fname s of
   Left err -> Left $ errorBundlePretty err
   Right x -> Right x
+
+lInteger :: Parser Integer
+lInteger = lexeme $ read <$> some (satisfy isDigit) <* notFollowedBy (satisfy isAlpha)
+
+-- using fmap 
+lInteger2 :: Parser Integer
+lInteger2 = fmap read (some (satisfy isDigit))
+
+lexeme :: Parser a -> Parser a
+lexeme p = p <* space 
+
+
