@@ -57,7 +57,7 @@ mandated or suggested reading.
   [here](https://www.youtube.com/playlist?list=PLF1Z-APd9zK7usPMx3LGMZEHrECUGodd3)
   and
   [here](https://www.youtube.com/playlist?list=PLF1Z-APd9zK5uFc8FKr_di9bfsYv8-lbc))
-* [AP Course Notes](https://diku-dk.github.io/ap-notes/)
+* [AP Course Notes](https://diku-dk.github.io/ap-notes)
 * [Course notes from Brent Yorgey's UPenn Haskell
   course](https://www.cis.upenn.edu/~cis1940/spring13/lectures.html)
 
@@ -217,7 +217,8 @@ We still recommend you follow the course.
 
 ### Date
 
-Week 44, *most likely* the entire week (this is currently unclear).
+The exam is held from the morning of the 27th of October to the evening of the
+3rd of November.
 
 You are not expected to work full time for the entire period. The intended exam
 workload is specified as 25 hours of work in the course description.
