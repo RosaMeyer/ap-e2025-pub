@@ -2,6 +2,7 @@ module SPC
   ( -- * SPC startup
     SPC,
     startSPC,
+    pingSPC,
   )
 where
 
@@ -36,12 +37,23 @@ removeAssoc _ [] = []
 -- Then the definition of the glorious SPC.
 
 -- Messages sent to SPC.
-data SPCMsg -- TODO: add messages.
+data SPCMsg
+     = MsgPing (ReplyChan Int)
 
 -- | A Handle to the SPC instance.
 data SPC = SPC (Server SPCMsg)
 
 startSPC :: IO SPC
 startSPC = do
-  server <- spawn undefined
+  server <- spawn $ \c -> forever $ handle c
   pure $ SPC server
+  where
+    handle c = do
+      msg <- receive c
+      case msg of
+        MsgPing resp -> reply resp 2
+
+-- must use requestReply
+pingSPC :: SPC -> IO Int
+pingSPC (SPC server) = requestReply server $ \resp -> MsgPing resp
+-- pingSPC (SPC c) = requestReply c MsgPing

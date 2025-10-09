@@ -1,10 +1,67 @@
 module APL.Eval
-  ( eval,
+  ( Val (..),
+    eval,
+    runEval,
+    Error,
   )
 where
 
-import APL.AST (Exp (..))
-import APL.Monad
+import APL.AST (Exp (..), VName)
+import Control.Monad (ap, liftM)
+
+data Val
+  = ValInt Integer
+  | ValBool Bool
+  | ValFun Env VName Exp
+  deriving (Eq, Show)
+
+type Env = [(VName, Val)]
+
+envEmpty :: Env
+envEmpty = []
+
+envExtend :: VName -> Val -> Env -> Env
+envExtend v val env = (v, val) : env
+
+envLookup :: VName -> Env -> Maybe Val
+envLookup v env = lookup v env
+
+type Error = String
+
+newtype EvalM a = EvalM (Env -> Either Error a)
+
+instance Functor EvalM where
+  fmap = liftM
+
+instance Applicative EvalM where
+  pure x = EvalM $ \_env -> Right x
+  (<*>) = ap
+
+instance Monad EvalM where
+  EvalM x >>= f = EvalM $ \env ->
+    case x env of
+      Left err -> Left err
+      Right x' ->
+        let EvalM y = f x'
+         in y env
+
+askEnv :: EvalM Env
+askEnv = EvalM $ \env -> Right env
+
+localEnv :: (Env -> Env) -> EvalM a -> EvalM a
+localEnv f (EvalM m) = EvalM $ \env -> m (f env)
+
+failure :: String -> EvalM a
+failure s = EvalM $ \_env -> Left s
+
+catch :: EvalM a -> EvalM a -> EvalM a
+catch (EvalM m1) (EvalM m2) = EvalM $ \env ->
+  case m1 env of
+    Left _ -> m2 env
+    Right x -> Right x
+
+runEval :: EvalM a -> Either Error a
+runEval (EvalM m) = m envEmpty
 
 evalIntBinOp :: (Integer -> Integer -> EvalM Integer) -> Exp -> Exp -> EvalM Val
 evalIntBinOp f e1 e2 = do
@@ -20,7 +77,6 @@ evalIntBinOp' f e1 e2 =
   where
     f' x y = pure $ f x y
 
--- Replaced with our 'eval' from our solution to assignment 2.
 eval :: Exp -> EvalM Val
 eval (CstInt x) = pure $ ValInt x
 eval (CstBool b) = pure $ ValBool b
@@ -87,18 +143,3 @@ eval (Apply e1 e2) = do
       failure "Cannot apply non-function"
 eval (TryCatch e1 e2) =
   eval e1 `catch` eval e2
-eval (Print s exp1) = do
-  v <- eval exp1
-  let string = case v of
-        (ValInt x1) -> show x1
-        (ValBool x1) -> show x1
-        _ -> "#<fun>"
-   in evalPrint $ s ++ ": " ++ string
-  pure v
-eval (KvPut k_exp v_exp) =
-  eval k_exp >>= \k ->
-    eval v_exp >>= \v ->
-      case (k, v) of
-        (x, y) -> evalKvPut x y >>= \_ -> pure v
-eval (KvGet k_exp) =
-  eval k_exp >>= \k -> evalKvGet k
